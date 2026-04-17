@@ -11,7 +11,7 @@
 :root {
   /* 배경을 따뜻한 아이보리 계열로 변경 */
   --bg-color: #f9f7f2; 
-  --main-red: #8b0000; /* 제목과 로고에 사용할 동일한 차분한 크림슨 색상 */
+  --main-red: #990000;
   /* 밝아진 배경에 맞춘 부드러운 뉴모피즘 그림자 */
   --shadow-light: #ffffff;
   --shadow-dark: #e3e1dc;
@@ -42,19 +42,17 @@ body {
 .hero h1 {
   font-family: 'Jua', sans-serif;
   font-size: 48px;
-  color: var(--main-red); /* 로고와 동일한 색상 사용 */
+  color: var(--main-red);
   margin: 0;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
 }
 
-/* 호랑이 아이콘 스타일링 - 쩅함 해결 */
+/* 새 호랑이 아이콘 스타일링 */
 .tiger-logo {
   width: 70px;
   height: auto;
-  /* 쨍함을 해결하기 위해 채도(saturate)를 낮추고 밝기(brightness)를 어둡게 조절했습니다.
-     흑백 아이콘을 차분한 크림슨(#8b0000) 색상으로 변환하는 필터 수치입니다.
-  */
-  filter: invert(13%) sepia(87%) saturate(2852%) hue-rotate(352deg) brightness(88%) contrast(110%);
+  /* 검정색 아이콘을 크림슨(#990000) 색상으로 변환하는 필터 */
+  filter: invert(13%) sepia(94%) saturate(7235%) hue-rotate(355deg) brightness(85%) contrast(119%);
 }
 
 /* 메인 카드 레이아웃 */
@@ -102,13 +100,13 @@ button#recommendBtn {
   padding: 16px;
   border: none;
   border-radius: 15px;
-  background: var(--main-red); /* 차분한 크림슨 */
+  background: var(--main-red);
   color: white;
   font-size: 20px;
   font-weight: bold;
   font-family: 'Jua', sans-serif;
   cursor: pointer;
-  box-shadow: 4px 4px 10px rgba(139, 0, 0, 0.2), 
+  box-shadow: 4px 4px 10px rgba(153, 0, 0, 0.2), 
              -2px -2px 5px rgba(255, 255, 255, 0.3);
   transition: all 0.2s ease;
 }
@@ -137,7 +135,7 @@ button#recommendBtn:active {
   background: none;
   font-family: 'Jua', sans-serif;
   font-size: 22px;
-  color: var(--main-red); /* 차분한 크림슨 */
+  color: var(--main-red);
   padding: 0;
   cursor: pointer;
   margin-bottom: 5px;
@@ -162,3 +160,93 @@ button#recommendBtn:active {
 }
 </style>
 </head>
+<body>
+
+<div class="container">
+  <div class="hero">
+    <img src="https://cdn-icons-png.flaticon.com/512/4691/4691278.png" alt="호랑이 로고" class="tiger-logo">
+    <h1>호랑아 밥먹자</h1>
+  </div>
+
+  <div class="app-layout">
+    <div>
+      <div class="card">
+        <label>🍚 음식 종류</label>
+        <select id="category">
+          <option value="전체">전체</option>
+          <option value="한식">한식</option>
+          <option value="중식">중식</option>
+          <option value="일식">일식</option>
+        </select>
+
+        <label>💰 가격대</label>
+        <select id="price">
+          <option value="전체">전체</option>
+          <option value="10000">1만원 이하</option>
+          <option value="15000">1.5만원 이하</option>
+          <option value="20000">2만원 이하</option>
+        </select>
+
+        <label>✨ 상황</label>
+        <select id="mood">
+          <option value="전체">전체</option>
+          <option value="혼밥">혼밥</option>
+          <option value="친구와">친구와</option>
+          <option value="데이트">데이트</option>
+        </select>
+
+        <button id="recommendBtn">오늘 뭐 먹지?</button>
+      </div>
+
+      <div id="result"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0; color:#555;">📍 맛집 지도</h3>
+      <div id="map">API를 연결하면 지도가 나타납니다</div>
+      <p style="text-align:center; font-size:13px; color:#a09a93; margin-top:15px;">식당 이름을 클릭하면 위치가 표시됩니다</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const restaurants = [
+  { name:"우승식당", category:"한식", price:9000, mood:["혼밥"], menu:"제육덮밥" },
+  { name:"춘리마라탕", category:"중식", price:12000, mood:["친구와"], menu:"마라탕" },
+  { name:"또정초밥", category:"일식", price:18000, mood:["데이트"], menu:"초밥세트" }
+];
+
+const resultEl = document.getElementById("result");
+
+function renderResults(items){
+  if(items.length === 0) {
+    resultEl.innerHTML = `<div class="restaurant-card">조건에 맞는 식당이 없어요 🐯</div>`;
+    return;
+  }
+  resultEl.innerHTML = items.map(r=>`
+    <div class="restaurant-card">
+      <button class="place-name-btn">${r.name}</button>
+      <div style="font-size:15px; color:#777;">추천 메뉴: ${r.menu}</div>
+    </div>
+  `).join("");
+}
+
+function recommendMenu(){
+  const category = document.getElementById("category").value;
+  const price = document.getElementById("price").value;
+  const mood = document.getElementById("mood").value;
+
+  let filtered = restaurants.filter(r=>{
+    return (category==="전체"||r.category===category)
+    && (price==="전체"||r.price<=parseInt(price))
+    && (mood==="전체"||r.mood.includes(mood));
+  });
+
+  renderResults(filtered);
+}
+
+document.getElementById("recommendBtn").addEventListener("click", recommendMenu);
+</script>
+
+</body>
+</html>
