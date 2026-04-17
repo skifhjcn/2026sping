@@ -12,7 +12,7 @@
   /* 배경을 따뜻한 아이보리 계열로 변경 */
   --bg-color: #f9f7f2; 
   --main-red: #990000;
-  /* 밝아진 배경에 맞춘 뉴모피즘 그림자 조절 */
+  /* 밝아진 배경에 맞춘 부드러운 뉴모피즘 그림자 */
   --shadow-light: #ffffff;
   --shadow-dark: #e3e1dc;
 }
@@ -51,8 +51,8 @@ body {
 .tiger-logo {
   width: 70px;
   height: auto;
-  /* 이미지를 크림슨 색상으로 입히는 필터 (검정색 아이콘 기준) */
-  filter: invert(11%) sepia(87%) saturate(5431%) hue-rotate(352deg) brightness(85%) contrast(115%);
+  /* 검정색 아이콘을 크림슨(#990000) 색상으로 변환하는 필터 */
+  filter: invert(13%) sepia(94%) saturate(7235%) hue-rotate(355deg) brightness(85%) contrast(119%);
 }
 
 /* 메인 카드 레이아웃 */
@@ -77,7 +77,7 @@ label {
   font-weight: bold;
   margin-bottom: 10px;
   font-size: 14px;
-  color: #776e65; /* 약간 따뜻한 회갈색 */
+  color: #776e65;
 }
 
 /* 입력 필드 스타일 */
@@ -164,7 +164,7 @@ button#recommendBtn:active {
 
 <div class="container">
   <div class="hero">
-    <img src="free-icon-tiger-4691278.png" alt="호랑이 로고" class="tiger-logo">
+    <img src="https://cdn-icons-png.flaticon.com/512/4691/4691278.png" alt="호랑이 로고" class="tiger-logo">
     <h1>호랑아 밥먹자</h1>
   </div>
 
@@ -198,8 +198,7 @@ button#recommendBtn:active {
         <button id="recommendBtn">오늘 뭐 먹지?</button>
       </div>
 
-      <div id="result">
-        </div>
+      <div id="result"></div>
     </div>
 
     <div class="card">
@@ -211,7 +210,6 @@ button#recommendBtn:active {
 </div>
 
 <script>
-/* 기존 스크립트 로직 동일 */
 const restaurants = [
   { name:"우승식당", category:"한식", price:9000, mood:["혼밥"], menu:"제육덮밥" },
   { name:"춘리마라탕", category:"중식", price:12000, mood:["친구와"], menu:"마라탕" },
