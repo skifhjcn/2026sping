@@ -8,123 +8,193 @@
 <style>
 body {
   margin:0;
-  font-family: Arial;
+  font-family: 'Arial', sans-serif;
   background:#f5f7fb;
 }
 
+/* 컨테이너 */
 .container {
   max-width:1200px;
   margin:auto;
   padding:20px;
 }
 
+/* 제목 영역 */
+.hero {
+  position:relative;
+  margin-bottom:20px;
+}
+
+.hero h1 {
+  font-size:36px;
+  margin:0;
+}
+
+/* 호랑이 */
+.tiger {
+  position:absolute;
+  right:0;
+  top:-10px;
+  width:90px;
+  transform:translateY(40%);
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.3));
+}
+
+/* 메인 빨간 카드 */
+.main-card {
+  background:#990000;
+  padding:30px;
+  border-radius:25px;
+}
+
+/* 레이아웃 */
 .app-layout {
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:20px;
 }
 
+/* 기본 카드 */
 .card {
   background:white;
-  padding:16px;
-  border-radius:12px;
-  margin-bottom:16px;
+  padding:18px;
+  border-radius:15px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.1);
 }
 
-select, button {
+/* 필터 */
+select {
   width:100%;
   padding:10px;
-  margin-top:8px;
-}
-
-button {
-  background:#990000;
-  color:white;
-  border:none;
+  margin:8px 0 12px;
   border-radius:10px;
-}
-
-.restaurant-card {
   border:1px solid #ddd;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:10px;
 }
 
+/* 버튼 */
+button {
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#ff4d4d;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+/* hover 효과 */
+button:hover {
+  transform:translateY(-2px);
+  box-shadow:0 6px 12px rgba(0,0,0,0.2);
+}
+
+/* 식당 카드 */
+.restaurant-card {
+  border:1px solid #eee;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:12px;
+  transition:0.2s;
+}
+
+/* 카드 hover */
+.restaurant-card:hover {
+  transform:translateY(-3px);
+  box-shadow:0 8px 16px rgba(0,0,0,0.15);
+}
+
+/* 식당 이름 */
 .place-name-btn {
   border:none;
   background:none;
   font-weight:bold;
+  font-size:18px;
   color:#990000;
   cursor:pointer;
-  font-size:18px;
 }
 
+/* 지도 */
 #map {
   height:500px;
+  border-radius:12px;
   background:#ddd;
   display:flex;
   align-items:center;
   justify-content:center;
 }
+
+/* 반응형 */
+@media(max-width:900px){
+  .app-layout{
+    grid-template-columns:1fr;
+  }
+}
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
-<h1>호랑아밥먹자</h1>
+  <div class="hero">
+    <h1>호랑아밥먹자</h1>
+    <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" class="tiger">
+  </div>
 
-<div class="app-layout">
+  <div class="main-card">
 
-<!-- 왼쪽 -->
-<div>
+    <div class="app-layout">
 
-<div class="card">
+      <!-- 왼쪽 -->
+      <div>
 
-<label>음식 종류</label>
-<select id="category">
-<option value="전체">전체</option>
-<option value="한식">한식</option>
-<option value="중식">중식</option>
-<option value="일식">일식</option>
-</select>
+        <div class="card">
+          <label>음식 종류</label>
+          <select id="category">
+            <option value="전체">전체</option>
+            <option value="한식">한식</option>
+            <option value="중식">중식</option>
+            <option value="일식">일식</option>
+          </select>
 
-<label>가격</label>
-<select id="price">
-<option value="전체">전체</option>
-<option value="10000">1만원 이하</option>
-<option value="15000">1.5만원 이하</option>
-<option value="20000">2만원 이하</option>
-</select>
+          <label>가격</label>
+          <select id="price">
+            <option value="전체">전체</option>
+            <option value="10000">1만원 이하</option>
+            <option value="15000">1.5만원 이하</option>
+            <option value="20000">2만원 이하</option>
+          </select>
 
-<label>상황</label>
-<select id="mood">
-<option value="전체">전체</option>
-<option value="혼밥">혼밥</option>
-<option value="친구와">친구와</option>
-<option value="데이트">데이트</option>
-<option value="빨리 먹기">빨리 먹기</option>
-</select>
+          <label>상황</label>
+          <select id="mood">
+            <option value="전체">전체</option>
+            <option value="혼밥">혼밥</option>
+            <option value="친구와">친구와</option>
+            <option value="데이트">데이트</option>
+          </select>
 
-<button id="recommendBtn">추천받기</button>
+          <button id="recommendBtn">추천받기</button>
+        </div>
 
-</div>
+        <div class="card">
+          <div id="result"></div>
+        </div>
 
-<div class="card">
-<div id="result"></div>
-</div>
+      </div>
 
-</div>
+      <!-- 오른쪽 -->
+      <div class="card">
+        <h3>지도</h3>
+        <div id="map">👉 API 연결하면 지도 뜸</div>
+        <p>식당 클릭하면 위치 표시됨</p>
+      </div>
 
-<!-- 오른쪽 -->
-<div class="card">
-<h3>지도</h3>
-<div id="map">👉 API 연결하면 지도 뜸</div>
-<p id="mapStatus">식당 클릭하면 위치 표시됨</p>
-</div>
+    </div>
 
-</div>
+  </div>
+
 </div>
 
 <script>
@@ -133,7 +203,7 @@ const restaurants = [
 name:"우승식당",
 category:"한식",
 price:9000,
-mood:["혼밥","빨리 먹기"],
+mood:["혼밥"],
 menu:"제육덮밥"
 },
 {
@@ -147,38 +217,20 @@ menu:"마라탕"
 name:"또정초밥",
 category:"일식",
 price:18000,
-mood:["데이트","친구와"],
+mood:["데이트"],
 menu:"초밥세트"
-},
-{
-name:"국민분식",
-category:"분식",
-price:7000,
-mood:["혼밥","빨리 먹기"],
-menu:"떡볶이"
 }
 ];
 
 const resultEl = document.getElementById("result");
 
 function renderResults(items){
-if(items.length===0){
-resultEl.innerHTML="조건에 맞는 식당 없음";
-return;
-}
-
-resultEl.innerHTML = items.map((r,i)=>`
+resultEl.innerHTML = items.map(r=>`
 <div class="restaurant-card">
 <button class="place-name-btn">${r.name}</button>
 <div>${r.menu}</div>
 </div>
 `).join("");
-
-document.querySelectorAll(".place-name-btn").forEach(btn=>{
-btn.addEventListener("click",()=>{
-alert("👉 지도 기능은 API 연결 후 활성화됩니다");
-});
-});
 }
 
 function recommendMenu(){
@@ -187,10 +239,9 @@ const price = document.getElementById("price").value;
 const mood = document.getElementById("mood").value;
 
 let filtered = restaurants.filter(r=>{
-const c = category==="전체" || r.category===category;
-const p = price==="전체" || r.price<=Number(price);
-const m = mood==="전체" || r.mood.includes(mood);
-return c && p && m;
+return (category==="전체"||r.category===category)
+&& (price==="전체"||r.price<=price)
+&& (mood==="전체"||r.mood.includes(mood));
 });
 
 renderResults(filtered);
