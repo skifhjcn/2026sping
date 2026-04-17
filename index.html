@@ -2,339 +2,136 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>호랑아밥먹자</title>
+
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f5f7fb;
-      color: #222;
     }
 
     .container {
-      max-width: 720px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 24px 16px 40px;
+      padding: 20px;
     }
 
-    .app-header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .app-header h1 {
-      margin: 0 0 8px;
-      font-size: 32px;
-    }
-
-    .app-header p {
-      margin: 0;
-      color: #666;
-      font-size: 15px;
+    .app-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
 
     .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      margin-bottom: 20px;
-    }
-
-    .filters {
-      display: grid;
-      gap: 16px;
-    }
-
-    .filter-group label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .filter-group select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #d9deea;
-      border-radius: 10px;
-      font-size: 15px;
-      background: #fff;
-    }
-
-    .button-wrap {
-      margin-top: 8px;
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
     }
 
     button {
       width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      background: #222;
+      padding: 12px;
+      background: #990000;
       color: white;
-    }
-#recommendBtn {
-  background: crimson;
-}
-    button:hover {
-      opacity: 0.92;
-    }
-
-    .result-title {
-      margin: 0 0 16px;
-      font-size: 22px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
     }
 
     .restaurant-card {
-      border: 1px solid #e7ebf3;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 14px;
-      background: #fafbfd;
-    }
-
-    .restaurant-card h3 {
-      margin: 0 0 8px;
-      font-size: 20px;
-    }
-
-    .meta {
-      font-size: 14px;
-      color: #666;
+      border: 1px solid #ddd;
+      padding: 12px;
       margin-bottom: 10px;
-    }
-
-    .menu {
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-
-    .reason {
-      font-size: 14px;
-      color: #333;
-      background: #eef3ff;
-      padding: 10px 12px;
       border-radius: 10px;
     }
 
-    .empty-message {
-      color: #666;
-      font-size: 15px;
-      line-height: 1.6;
+    .place-name-btn {
+      background: none;
+      border: none;
+      color: #990000;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 18px;
     }
 
-    @media (max-width: 480px) {
-      .app-header h1 {
-        font-size: 28px;
-      }
+    #map {
+      height: 500px;
+      background: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+      border-radius: 10px;
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <header class="app-header">
-      <h1>호랑아밥먹자</h1>
-      <p>오늘 점심은 어떤 걸로 드실래요?</p>
-    </header>
+<div class="container">
 
-    <section class="card">
-      <div class="filters">
-        <div class="filter-group">
-          <label for="category">음식 종류</label>
-          <select id="category">
-            <option value="전체">전체</option>
-            <option value="한식">한식</option>
-            <option value="중식">중식</option>
-            <option value="일식">일식</option>
-            <option value="양식">양식</option>
-            <option value="분식">분식</option>
-            <option value="카페">카페</option>
-          </select>
-        </div>
+  <h1>호랑아밥먹자</h1>
 
-        <div class="filter-group">
-          <label for="price">가격대</label>
-          <select id="price">
-            <option value="전체">전체</option>
-            <option value="10000">1만 원 이하</option>
-            <option value="15000">1만 5천 원 이하</option>
-            <option value="20000">2만 원 이하</option>
-          </select>
-        </div>
+  <div class="app-layout">
 
-        <div class="filter-group">
-          <label for="mood">상황</label>
-          <select id="mood">
-            <option value="전체">전체</option>
-            <option value="혼밥">혼밥</option>
-            <option value="친구와">친구와</option>
-            <option value="데이트">데이트</option>
-            <option value="빨리 먹기">빨리 먹기</option>
-          </select>
-        </div>
+    <!-- 왼쪽 -->
+    <div>
 
-        <div class="button-wrap">
-          <button id="recommendBtn">추천받기</button>
-        </div>
+      <div class="card">
+        <button id="recommendBtn">추천받기</button>
       </div>
-    </section>
 
-    <section class="card">
-      <h2 class="result-title">추천 결과</h2>
-      <div id="result">
-        <p class="empty-message">조건을 고른 뒤 추천받기 버튼을 눌러주세요.</p>
+      <div class="card">
+        <div id="result"></div>
       </div>
-    </section>
+
+    </div>
+
+    <!-- 오른쪽 -->
+    <div class="card">
+      <h3>지도</h3>
+      <div id="map">
+        👉 API 연결하면 여기에 지도 뜹니다
+      </div>
+      <p id="mapStatus">식당 이름을 클릭해보세요</p>
+    </div>
+
   </div>
+</div>
 
-  <script>
-    const restaurants = [
-      {
-        name: "우승식당",
-        category: "한식",
-        menu: "제육덮밥",
-        price: 8500,
-        mood: ["혼밥", "빨리 먹기"],
-        desc: "든든하고 무난하게 먹기 좋은 한식입니다."
-      },
-      {
-        name: "춘리마라탕",
-        category: "중식",
-        menu: "마라탕",
-        price: 12000,
-        mood: ["친구와"],
-        desc: "자극적인 메뉴가 당길 때 잘 맞습니다."
-      },
-      {
-        name: "또정초밥",
-        category: "일식",
-        menu: "오마카세 판초밥",
-        price: 18000,
-        mood: ["혼밥", "친구와"],
-        desc: "조금 깔끔하고 분위기 있는 식사를 원할 때 좋습니다."
-      },
-      {
-        name: "mychef",
-        category: "양식",
-        menu: "투움바 파스타",
-        price: 17000,
-        mood: ["데이트", "친구와"],
-        desc: "대화하면서 천천히 먹기 좋은 곳입니다."
-      },
-      {
-        name: "이공김밥",
-        category: "분식",
-        menu: "참치김밥",
-        price: 7000,
-        mood: ["혼밥", "빨리 먹기", "친구와"],
-        desc: "가볍고 빠르게 먹고 싶을 때 적합합니다."
-      },
-      {
-        name: "프로마치",
-        category: "카페",
-        menu: "샌드위치 브런치",
-        price: 13000,
-        mood: ["데이트", "혼밥"],
-        desc: "가볍게 먹으면서 쉬기 좋은 선택입니다."
-      },
-      {
-        name: "미스터국밥",
-        category: "한식",
-        menu: "돼지국밥",
-        price: 9000,
-        mood: ["혼밥", "빨리 먹기"],
-        desc: "따뜻하고 든든한 식사를 원할 때 추천드립니다."
-      },
-      {
-        name: "일월의 제면소",
-        category: "일식",
-        menu: "가케우동",
-        price: 8000,
-        mood: ["혼밥", "빨리 먹기"],
-        desc: "부담 없이 간단하게 먹기 좋습니다."
-      }
-    ];
+<script>
+const restaurants = [
+  { name: "우승식당", menu: "제육덮밥" },
+  { name: "춘리마라탕", menu: "마라탕" },
+  { name: "또정초밥", menu: "초밥세트" }
+];
 
-    const categoryEl = document.getElementById("category");
-    const priceEl = document.getElementById("price");
-    const moodEl = document.getElementById("mood");
-    const recommendBtn = document.getElementById("recommendBtn");
-    const resultEl = document.getElementById("result");
+const resultEl = document.getElementById("result");
 
-    function getRecommendationReason(place, selectedMood, selectedPrice) {
-      const reasons = [];
+function renderResults() {
+  resultEl.innerHTML = restaurants.map((r, i) => `
+    <div class="restaurant-card">
+      <button class="place-name-btn" data-index="${i}">
+        ${r.name}
+      </button>
+      <div>${r.menu}</div>
+    </div>
+  `).join("");
 
-      if (selectedMood !== "전체" && place.mood.includes(selectedMood)) {
-        reasons.push(`'${selectedMood}' 상황에 잘 맞습니다`);
-      }
+  document.querySelectorAll(".place-name-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      alert("👉 지도는 API 연결 후 표시됩니다");
+    });
+  });
+}
 
-      if (selectedPrice !== "전체" && place.price <= Number(selectedPrice)) {
-        reasons.push("예산 안에서 고를 수 있습니다");
-      }
+document.getElementById("recommendBtn")
+  .addEventListener("click", renderResults);
+</script>
 
-      if (reasons.length === 0) {
-        reasons.push("조건에 무난하게 잘 맞는 메뉴입니다");
-      }
-
-      return reasons.join(", ") + ".";
-    }
-
-    function renderResults(items, selectedMood, selectedPrice) {
-      if (items.length === 0) {
-        resultEl.innerHTML = `
-          <p class="empty-message">
-            조건에 맞는 메뉴를 찾지 못했습니다.<br>
-            음식 종류나 가격대를 조금 넓혀서 다시 시도해보세요.
-          </p>
-        `;
-        return;
-      }
-
-      resultEl.innerHTML = items.map(place => `
-        <div class="restaurant-card">
-          <h3>${place.name}</h3>
-          <div class="meta">${place.category} · ${place.price.toLocaleString()}원</div>
-          <div class="menu"><strong>추천 메뉴:</strong> ${place.menu}</div>
-          <div class="reason">
-            ${getRecommendationReason(place, selectedMood, selectedPrice)}<br>
-            ${place.desc}
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function recommendMenu() {
-      const selectedCategory = categoryEl.value;
-      const selectedPrice = priceEl.value;
-      const selectedMood = moodEl.value;
-
-      let filtered = restaurants.filter(place => {
-        const matchCategory =
-          selectedCategory === "전체" || place.category === selectedCategory;
-
-        const matchPrice =
-          selectedPrice === "전체" || place.price <= Number(selectedPrice);
-
-        const matchMood =
-          selectedMood === "전체" || place.mood.includes(selectedMood);
-
-        return matchCategory && matchPrice && matchMood;
-      });
-
-      filtered = filtered.slice(0, 3);
-
-      renderResults(filtered, selectedMood, selectedPrice);
-    }
-
-    recommendBtn.addEventListener("click", recommendMenu);
-  </script>
 </body>
 </html>
