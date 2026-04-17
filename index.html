@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>호랑아밥먹자</title>
 
+<!-- ⭐ Jua 폰트 추가 -->
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
 <style>
 body {
   margin:0;
-  font-family: 'Arial', sans-serif;
+  font-family: Arial, sans-serif;
   background:#f5f7fb;
 }
 
@@ -25,9 +28,27 @@ body {
   margin-bottom:20px;
 }
 
+/* ⭐ 로고 스타일 핵심 */
 .hero h1 {
-  font-size:36px;
-  margin:0;
+  font-family: 'Jua', sans-serif;
+  font-size: 44px;
+  color: #000;
+
+  transform: rotate(-3deg);
+  letter-spacing: 3px;
+
+  text-shadow:
+    2px 2px 0 #fff,
+    4px 4px 0 #990000;
+
+  display: inline-block;
+  padding: 6px 12px;
+}
+
+/* 호버 효과 */
+.hero h1:hover {
+  transform: rotate(0deg) scale(1.05);
+  transition: 0.2s;
 }
 
 /* 호랑이 */
@@ -40,7 +61,7 @@ body {
   filter: drop-shadow(0 6px 10px rgba(0,0,0,0.3));
 }
 
-/* 메인 빨간 카드 */
+/* 메인 카드 */
 .main-card {
   background:#990000;
   padding:30px;
@@ -54,7 +75,7 @@ body {
   gap:20px;
 }
 
-/* 기본 카드 */
+/* 카드 */
 .card {
   background:white;
   padding:18px;
@@ -84,7 +105,6 @@ button {
   transition:0.2s;
 }
 
-/* hover 효과 */
 button:hover {
   transform:translateY(-2px);
   box-shadow:0 6px 12px rgba(0,0,0,0.2);
@@ -99,7 +119,6 @@ button:hover {
   transition:0.2s;
 }
 
-/* 카드 hover */
 .restaurant-card:hover {
   transform:translateY(-3px);
   box-shadow:0 8px 16px rgba(0,0,0,0.15);
@@ -199,27 +218,9 @@ button:hover {
 
 <script>
 const restaurants = [
-{
-name:"우승식당",
-category:"한식",
-price:9000,
-mood:["혼밥"],
-menu:"제육덮밥"
-},
-{
-name:"춘리마라탕",
-category:"중식",
-price:12000,
-mood:["친구와"],
-menu:"마라탕"
-},
-{
-name:"또정초밥",
-category:"일식",
-price:18000,
-mood:["데이트"],
-menu:"초밥세트"
-}
+{ name:"우승식당", category:"한식", price:9000, mood:["혼밥"], menu:"제육덮밥" },
+{ name:"춘리마라탕", category:"중식", price:12000, mood:["친구와"], menu:"마라탕" },
+{ name:"또정초밥", category:"일식", price:18000, mood:["데이트"], menu:"초밥세트" }
 ];
 
 const resultEl = document.getElementById("result");
