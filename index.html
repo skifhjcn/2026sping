@@ -6,6 +6,7 @@
   <title>whatieattoday</title>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    /* 기본 스타일 유지 */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --ivory: #f0ece0;
@@ -75,6 +76,38 @@
     .meal-thumb.has-photo .meal-time-label,
     .meal-thumb.has-ai .meal-time-label {
       color: rgba(255,255,255,0.92); text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    }
+
+    /* ===== MAGAZINE BANNER & MODAL STYLE ===== */
+    .magazine-section { margin-top: 24px; padding: 0 4px; }
+    .magazine-banner {
+      background: var(--ivory); box-shadow: var(--shadow-out);
+      border-radius: 20px; padding: 18px; cursor: pointer;
+      display: flex; align-items: center; gap: 15px; transition: transform 0.2s;
+    }
+    .magazine-banner:active { transform: scale(0.98); box-shadow: var(--shadow-in); }
+    .magazine-icon { font-size: 24px; }
+    .magazine-info h3 { font-family: 'Caveat', cursive; font-size: 19px; color: var(--accent); }
+    .magazine-info p { font-family: 'Caveat', cursive; font-size: 14px; color: var(--text-muted); }
+
+    #magazine-modal {
+      display: none; position: fixed; inset: 0; background: var(--ivory);
+      z-index: 200; padding: 30px 20px; overflow-y: auto;
+    }
+    .modal-content { max-width: 450px; margin: 0 auto; position: relative; }
+    .modal-close {
+      position: absolute; top: -10px; right: 0; background: none; border: none;
+      font-size: 32px; color: var(--text-muted); cursor: pointer; font-family: sans-serif;
+    }
+    .mag-item {
+      background: var(--ivory); box-shadow: var(--shadow-sm);
+      border-radius: 24px; padding: 22px; margin-bottom: 20px; line-height: 1.6;
+    }
+    .mag-item h4 { font-family: 'Caveat', cursive; font-size: 22px; color: var(--accent); margin-bottom: 8px; }
+    .mag-item p { font-family: 'Caveat', cursive; font-size: 16px; color: var(--text-main); }
+    .mag-tag { 
+      display: inline-block; font-family: 'Caveat', cursive; font-size: 13px; color: #fff; 
+      background: var(--accent); padding: 2px 10px; border-radius: 12px; margin-bottom: 10px;
     }
 
     /* ===== DETAIL VIEW ===== */
@@ -182,7 +215,6 @@
 <body>
 <div id="app">
 
-  <!-- MAIN VIEW -->
   <div id="main-view">
     <div class="app-header">
       <h1>whatieattoday</h1><br>
@@ -196,9 +228,43 @@
     </div>
 
     <div class="days-grid" id="days-grid"></div>
+
+    <div class="magazine-section">
+      <div class="magazine-banner" onclick="openMagazine()">
+        <div class="magazine-icon">🍴</div>
+        <div class="magazine-info">
+          <h3>Seasonal Food Guide</h3>
+          <p>지금 꼭 먹어야 할 제철 음식 이야기</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- DETAIL VIEW -->
+  <div id="magazine-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeMagazine()">×</button>
+      <h2 style="text-align: center; margin-bottom: 30px; font-size: 28px; font-family: 'Caveat';">Weekly Pick</h2>
+      
+      <div class="mag-item">
+        <span class="mag-tag">봄의 전령사</span>
+        <h4>🦀 달큰한 꽃게</h4>
+        <p>봄 꽃게는 알이 꽉 차고 살이 가장 달콤할 때예요. 탕으로 끓여도 좋지만, 찜으로 본연의 단맛을 느껴보는 건 어떨까요?</p>
+      </div>
+
+      <div class="mag-item">
+        <span class="mag-tag">단짠의 정석</span>
+        <h4>🍅 대저 짭짤이 토마토</h4>
+        <p>부산 대저동에서만 나는 이 보물 같은 토마토는 짧은 봄에만 만날 수 있어요. 짭짤하면서도 강렬한 단맛이 매력적이죠.</p>
+      </div>
+
+      <div class="mag-item">
+        <span class="mag-tag">요즘 유행</span>
+        <h4>🧈 고소한 버터떡</h4>
+        <p>겉은 바삭, 속은 쫀득! 가래떡을 버터에 구워 꿀이나 설탕을 곁들여보세요. 요즘 가장 핫한 홈메이드 간식이랍니다.</p>
+      </div>
+    </div>
+  </div>
+
   <div id="detail-view">
     <div class="detail-header">
       <button class="back-btn" onclick="closeDetail()">&#8592;</button>
@@ -476,6 +542,25 @@ Rules:
     if (!diary[currentKey]) diary[currentKey] = {};
     Object.assign(diary[currentKey], { menu, memo, tags });
     closeDetail();
+  }
+
+  /* 매거진 열기/닫기 함수 */
+  function openMagazine() {
+    document.getElementById('magazine-modal').style.display = 'block';
+    document.body.style.overflow = 'hidden'; 
+  }
+
+  function closeMagazine() {
+    document.getElementById('magazine-modal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+
+  // 모달 밖 클릭 시 닫기
+  window.onclick = function(event) {
+    const modal = document.getElementById('magazine-modal');
+    if (event.target == modal) {
+      closeMagazine();
+    }
   }
 
   renderGrid();
