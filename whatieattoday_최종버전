@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>whatieattoday — social</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ivory: #f0ece0;
+      --shadow-out: 6px 6px 14px #c8c4b8, -6px -6px 14px #ffffff;
+      --shadow-in: inset 4px 4px 10px #c8c4b8, inset -4px -4px 10px #ffffff;
+      --shadow-sm: 3px 3px 8px #c8c4b8, -3px -3px 8px #ffffff;
+      --accent: #a89070;
+      --accent-deep: #8b6f4e;
+      --text-main: #5a4e3c;
+      --text-muted: #9a8e7c;
+      --text-light: #bbb0a0;
+    }
+    body { background: var(--ivory); font-family: 'Caveat', cursive; color: var(--text-main); min-height: 100vh; }
+    #app { min-height: 100vh; background: var(--ivory); max-width: 480px; margin: 0 auto; position: relative; padding-bottom: 76px; }
+
+    /* ===== TOP BAR (account switcher) ===== */
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px 6px;
+    }
+    .me-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--ivory); box-shadow: var(--shadow-sm);
+      border: none; border-radius: 20px; padding: 5px 12px 5px 5px;
+      cursor: pointer; font-family: 'Caveat', cursive; transition: box-shadow .15s;
+    }
+    .me-chip:active { box-shadow: var(--shadow-in); }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; color: #fff; flex-shrink: 0; font-family: sans-serif;
+    }
+    .me-chip .me-name { font-size: 17px; color: var(--text-main); }
+    .me-chip .me-code { font-size: 12px; color: var(--text-muted); }
+    .icon-btn {
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      background: var(--ivory); box-shadow: var(--shadow-sm); cursor: pointer;
+      font-size: 18px; color: var(--text-muted); position: relative;
+      display: flex; align-items: center; justify-content: center; transition: box-shadow .15s;
+    }
+    .icon-btn:active { box-shadow: var(--shadow-in); }
+    .badge {
+      position: absolute; top: -2px; right: -2px; min-width: 17px; height: 17px;
+      background: #c4756a; color: #fff; border-radius: 9px; font-size: 11px;
+      font-family: sans-serif; display: flex; align-items: center; justify-content: center;
+      padding: 0 4px; border: 2px solid var(--ivory);
+    }
+
+    /* ===== MAIN VIEW ===== */
+    #main-view { padding: 4px 16px 32px; }
+    .app-header { text-align: center; padding: 8px 0 18px; }
+    .app-header h1 {
+      font-size: 30px; font-weight: 700; color: var(--text-main);
+      letter-spacing: 1px; transform: rotate(-1.5deg); display: inline-block; margin-bottom: 4px;
+    }
+    .app-header p { font-size: 16px; color: var(--text-muted); transform: rotate(0.8deg); display: inline-block; }
+
+    .week-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 18px; }
+    .nav-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: none;
+      background: var(--ivory); box-shadow: var(--shadow-sm);
+      cursor: pointer; font-size: 18px; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center; transition: box-shadow .15s;
+    }
+    .nav-btn:active { box-shadow: var(--shadow-in); }
+    .week-label { font-size: 16px; color: var(--text-muted); min-width: 130px; text-align: center; }
+
+    .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 16px; }
+    .day-col { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+    .day-label { font-size: 14px; color: var(--text-muted); padding: 4px 0 2px; text-align: center; }
+    .day-label.today { color: var(--accent); font-weight: 700; }
+
+    .meal-thumb {
+      width: 100%; aspect-ratio: 1; border-radius: 14px;
+      background: var(--ivory); box-shadow: var(--shadow-sm);
+      cursor: pointer; overflow: hidden; position: relative;
+      transition: box-shadow .15s, transform .15s; border: none; display: block;
+    }
+    .meal-thumb:active { box-shadow: var(--shadow-in); transform: scale(0.97); }
+    .meal-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; display: block; }
+    .default-icon { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    .meal-time-label {
+      position: absolute; bottom: 3px; left: 0; right: 0;
+      text-align: center; font-size: 9px; color: var(--text-muted);
+    }
+    .meal-thumb.has-photo .meal-time-label, .meal-thumb.has-draw .meal-time-label {
+      color: rgba(255,255,255,0.92); text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    }
+    /* dot marker: friends left notes on my meal */
+    .friend-dot {
+      position: absolute; top: 5px; right: 5px; width: 9px; height: 9px;
+      border-radius: 50%; background: #c4756a; border: 1.5px solid var(--ivory);
+    }
+
+    /* ===== BOTTOM NAV ===== */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; display: flex; justify-content: space-around;
+      background: var(--ivory); padding: 8px 0 12px; box-shadow: 0 -4px 14px rgba(200,196,184,0.5);
+      z-index: 50;
+    }
+    .tab-btn {
+      background: none; border: none; cursor: pointer; font-family: 'Caveat', cursive;
+      font-size: 13px; color: var(--text-light); display: flex; flex-direction: column;
+      align-items: center; gap: 2px; padding: 4px 16px; border-radius: 14px; position: relative;
+    }
+    .tab-btn .tab-ico { font-size: 20px; }
+    .tab-btn.active { color: var(--accent); }
+    .tab-btn .badge { top: 0; right: 8px; }
+
+    /* ===== MAGAZINE ===== */
+    .magazine-section { margin-top: 22px; padding: 0 4px; }
+    .magazine-banner {
+      background: var(--ivory); box-shadow: var(--shadow-out); border-radius: 20px;
+      padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: transform .2s;
+    }
+    .magazine-banner:active { transform: scale(0.98); box-shadow: var(--shadow-in); }
+    .magazine-icon { font-size: 24px; }
+    .magazine-info h3 { font-size: 19px; color: var(--accent); }
+    .magazine-info p { font-size: 14px; color: var(--text-muted); }
+
+    /* ===== SHARED MODAL / FULL VIEW ===== */
+    .full-view {
+      display: none; position: fixed; inset: 0; background: var(--ivory);
+      z-index: 100; overflow-y: auto; padding: 0 0 90px; max-width: 480px; margin: 0 auto;
+    }
+    .full-header {
+      display: flex; align-items: center; padding: 16px 16px 12px; gap: 12px;
+      position: sticky; top: 0; background: var(--ivory); z-index: 10;
+    }
+    .back-btn {
+      width: 40px; height: 40px; border-radius: 50%; border: none;
+      background: var(--ivory); box-shadow: var(--shadow-sm); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--text-muted); flex-shrink: 0; transition: box-shadow .15s;
+    }
+    .back-btn:active { box-shadow: var(--shadow-in); }
+    .full-title { font-size: 22px; color: var(--text-main); }
+    .full-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 1px; }
+    .section-label { font-size: 15px; color: var(--text-muted); margin-bottom: 8px; }
+
+    /* ===== DETAIL (my meal edit) ===== */
+    .photo-upload-area {
+      margin: 8px 16px 0; border-radius: 24px; background: var(--ivory);
+      box-shadow: var(--shadow-out); aspect-ratio: 4/3;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; overflow: hidden; position: relative; transition: box-shadow .15s;
+    }
+    .photo-upload-area img { width: 100%; height: 100%; object-fit: cover; border-radius: 24px; }
+    .photo-placeholder { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .photo-placeholder p { font-size: 15px; color: var(--text-light); }
+    .photo-overlay-btn {
+      position: absolute; bottom: 14px; right: 14px; background: var(--ivory);
+      box-shadow: var(--shadow-sm); border: none; border-radius: 50%; width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--accent); font-size: 20px;
+    }
+    #photo-input { display: none; }
+    .menu-input-wrap { padding: 16px 16px 0; }
+    .menu-row {
+      background: var(--ivory); box-shadow: var(--shadow-in); border: none;
+      border-radius: 16px; padding: 10px 14px; width: 100%; display: flex; align-items: center; gap: 8px;
+    }
+    .menu-row input {
+      background: transparent; border: none; outline: none; flex: 1;
+      font-family: 'Caveat', cursive; font-size: 17px; color: var(--text-main);
+    }
+    .menu-row input::placeholder { color: var(--text-light); }
+    .memo-section { padding: 14px 16px 0; }
+    .memo-box {
+      background: var(--ivory); box-shadow: var(--shadow-in); border: none;
+      border-radius: 18px; padding: 12px 16px; width: 100%; min-height: 70px;
+      font-family: 'Caveat', cursive; font-size: 17px; color: var(--text-main);
+      resize: none; outline: none; line-height: 1.6;
+    }
+    .memo-box::placeholder { color: var(--text-light); }
+    .tags-section { padding: 14px 16px 0; }
+    .tag-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .tag-chip {
+      padding: 5px 14px; border-radius: 20px; background: var(--ivory);
+      box-shadow: var(--shadow-sm); font-family: 'Caveat', cursive; font-size: 15px;
+      color: var(--text-muted); cursor: pointer; border: none; transition: box-shadow .15s;
+    }
+    .tag-chip.selected { box-shadow: var(--shadow-in); color: var(--accent); }
+
+    /* visibility selector */
+    .vis-section { padding: 14px 16px 0; }
+    .vis-row { display: flex; gap: 8px; margin-top: 8px; }
+    .vis-opt {
+      flex: 1; padding: 8px 4px; border-radius: 16px; background: var(--ivory);
+      box-shadow: var(--shadow-sm); font-family: 'Caveat', cursive; font-size: 14px;
+      color: var(--text-muted); cursor: pointer; border: none; text-align: center; transition: box-shadow .15s;
+    }
+    .vis-opt.selected { box-shadow: var(--shadow-in); color: var(--accent); font-weight: 700; }
+
+    .save-btn {
+      margin: 22px 16px 0; width: calc(100% - 32px); padding: 14px;
+      border-radius: 20px; border: none; background: var(--ivory);
+      box-shadow: var(--shadow-out); font-family: 'Caveat', cursive;
+      font-size: 20px; color: var(--accent); letter-spacing: 2px; cursor: pointer; transition: box-shadow .15s;
+    }
+    .save-btn:active { box-shadow: var(--shadow-in); }
+
+    /* ===== EXCHANGE-DIARY GUESTBOOK (notes on a meal) ===== */
+    .meal-preview-card {
+      margin: 8px 16px 0; border-radius: 24px; background: var(--ivory);
+      box-shadow: var(--shadow-out); padding: 18px; display: flex; gap: 14px; align-items: center;
+    }
+    .meal-preview-thumb {
+      width: 84px; height: 84px; border-radius: 18px; flex-shrink: 0; overflow: hidden;
+      box-shadow: var(--shadow-in); display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg,#fdf6e8,#f5edd8);
+    }
+    .meal-preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .meal-preview-info .pv-menu { font-size: 21px; color: var(--text-main); }
+    .meal-preview-info .pv-memo { font-size: 15px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+    .meal-preview-info .pv-tags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px; }
+    .pv-tag { font-size: 12px; color: #fff; background: var(--accent); padding: 1px 9px; border-radius: 10px; }
+
+    .notes-wrap { padding: 18px 16px 0; }
+    .note-item {
+      background: var(--ivory); box-shadow: var(--shadow-sm); border-radius: 18px;
+      padding: 12px 14px; margin-bottom: 12px; display: flex; gap: 10px;
+    }
+    .note-item .note-body { flex: 1; }
+    .note-head { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+    .note-head .nh-name { font-size: 16px; color: var(--text-main); font-weight: 600; }
+    .note-head .nh-time { font-size: 12px; color: var(--text-light); }
+    .note-text { font-size: 16px; color: var(--text-main); line-height: 1.45; }
+    .note-draw { margin-top: 8px; border-radius: 14px; box-shadow: var(--shadow-in); background:#fffdf6; display: block; }
+    .notes-empty { text-align: center; color: var(--text-light); font-size: 16px; padding: 18px 0 4px; }
+
+    /* leave-a-note composer */
+    .composer {
+      margin: 6px 16px 0; background: var(--ivory); box-shadow: var(--shadow-out);
+      border-radius: 22px; padding: 16px;
+    }
+    .composer .section-label { margin-bottom: 10px; }
+    .draw-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .color-dot {
+      width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: none;
+      box-shadow: var(--shadow-sm); transition: transform .12s;
+    }
+    .color-dot.active { transform: scale(1.18); box-shadow: var(--shadow-in); }
+    .tool-btn {
+      background: var(--ivory); box-shadow: var(--shadow-sm); border: none; border-radius: 12px;
+      padding: 5px 11px; cursor: pointer; font-family: 'Caveat', cursive; font-size: 14px; color: var(--text-muted);
+    }
+    .tool-btn.active { box-shadow: var(--shadow-in); color: var(--accent); }
+    #note-canvas {
+      width: 100%; height: 180px; border-radius: 16px; background: #fffdf6;
+      box-shadow: var(--shadow-in); touch-action: none; display: block; cursor: crosshair;
+    }
+    .note-text-input {
+      margin-top: 10px; background: var(--ivory); box-shadow: var(--shadow-in); border: none;
+      border-radius: 14px; padding: 10px 14px; width: 100%; min-height: 50px;
+      font-family: 'Caveat', cursive; font-size: 17px; color: var(--text-main); resize: none; outline: none;
+    }
+    .note-text-input::placeholder { color: var(--text-light); }
+    .leave-btn {
+      margin-top: 12px; width: 100%; padding: 12px; border-radius: 18px; border: none;
+      background: var(--ivory); box-shadow: var(--shadow-out); font-family: 'Caveat', cursive;
+      font-size: 19px; color: var(--accent); letter-spacing: 1px; cursor: pointer; transition: box-shadow .15s;
+    }
+    .leave-btn:active { box-shadow: var(--shadow-in); }
+
+    /* ===== FRIENDS VIEW ===== */
+    .friends-search-row { padding: 8px 16px 0; display: flex; gap: 8px; }
+    .friends-search-row input {
+      flex: 1; background: var(--ivory); box-shadow: var(--shadow-in); border: none;
+      border-radius: 16px; padding: 10px 14px; font-family: 'Caveat', cursive; font-size: 17px;
+      color: var(--text-main); outline: none;
+    }
+    .friends-search-row input::placeholder { color: var(--text-light); }
+    .small-btn {
+      background: var(--ivory); box-shadow: var(--shadow-sm); border: none; border-radius: 16px;
+      padding: 0 16px; cursor: pointer; font-family: 'Caveat', cursive; font-size: 16px;
+      color: var(--accent); transition: box-shadow .15s;
+    }
+    .small-btn:active { box-shadow: var(--shadow-in); }
+    .list-section-label { padding: 18px 18px 6px; font-size: 16px; color: var(--text-muted); }
+    .person-row {
+      margin: 0 16px 10px; background: var(--ivory); box-shadow: var(--shadow-sm); border-radius: 18px;
+      padding: 11px 14px; display: flex; align-items: center; gap: 11px;
+    }
+    .person-row .pr-info { flex: 1; }
+    .person-row .pr-name { font-size: 17px; color: var(--text-main); }
+    .person-row .pr-code { font-size: 12px; color: var(--text-muted); }
+    .req-btns { display: flex; gap: 6px; }
+    .mini-btn {
+      border: none; border-radius: 12px; padding: 6px 12px; cursor: pointer;
+      font-family: 'Caveat', cursive; font-size: 15px; background: var(--ivory);
+      box-shadow: var(--shadow-sm); color: var(--accent); transition: box-shadow .15s;
+    }
+    .mini-btn:active { box-shadow: var(--shadow-in); }
+    .mini-btn.ghost { color: var(--text-light); }
+    .mini-btn.pending { color: var(--text-light); box-shadow: var(--shadow-in); cursor: default; }
+
+    /* ===== FEED VIEW ===== */
+    .feed-card {
+      margin: 0 16px 16px; background: var(--ivory); box-shadow: var(--shadow-out);
+      border-radius: 24px; padding: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s;
+    }
+    .feed-card:active { transform: scale(0.99); box-shadow: var(--shadow-in); }
+    .feed-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .feed-head .fh-name { font-size: 17px; color: var(--text-main); }
+    .feed-head .fh-meta { font-size: 13px; color: var(--text-muted); }
+    .feed-body { display: flex; gap: 14px; }
+    .feed-thumb {
+      width: 92px; height: 92px; border-radius: 18px; flex-shrink: 0; overflow: hidden;
+      box-shadow: var(--shadow-in); display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg,#fdf6e8,#f5edd8);
+    }
+    .feed-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .feed-info .fi-menu { font-size: 21px; color: var(--text-main); }
+    .feed-info .fi-memo { font-size: 15px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+    .feed-foot { margin-top: 11px; display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--text-muted); }
+    .feed-foot .ff-item { display: flex; align-items: center; gap: 4px; }
+
+    /* ===== NOTIFICATIONS ===== */
+    .notif-item {
+      margin: 0 16px 10px; background: var(--ivory); box-shadow: var(--shadow-sm); border-radius: 18px;
+      padding: 12px 14px; display: flex; align-items: center; gap: 11px; cursor: pointer;
+    }
+    .notif-item.unread { box-shadow: var(--shadow-out); }
+    .notif-item .ni-text { flex: 1; font-size: 16px; color: var(--text-main); line-height: 1.35; }
+    .notif-item .ni-text b { font-weight: 700; }
+    .notif-item .ni-time { font-size: 12px; color: var(--text-light); }
+    .notif-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #c4756a; flex-shrink: 0; }
+
+    /* ===== MAGAZINE MODAL ===== */
+    #magazine-modal { display: none; position: fixed; inset: 0; background: var(--ivory); z-index: 200; padding: 30px 20px; overflow-y: auto; }
+    .modal-content { max-width: 450px; margin: 0 auto; position: relative; }
+    .modal-close { position: absolute; top: -10px; right: 0; background: none; border: none; font-size: 32px; color: var(--text-muted); cursor: pointer; font-family: sans-serif; }
+    .mag-item { background: var(--ivory); box-shadow: var(--shadow-sm); border-radius: 24px; padding: 22px; margin-bottom: 20px; line-height: 1.6; }
+    .mag-item h4 { font-size: 22px; color: var(--accent); margin-bottom: 8px; }
+    .mag-item p { font-size: 16px; color: var(--text-main); }
+    .mag-tag { display: inline-block; font-size: 13px; color: #fff; background: var(--accent); padding: 2px 10px; border-radius: 12px; margin-bottom: 10px; }
+
+    /* account switcher sheet */
+    #acct-sheet { display: none; position: fixed; inset: 0; background: rgba(90,78,60,0.25); z-index: 300; }
+    .sheet-panel {
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 480px; background: var(--ivory); border-radius: 26px 26px 0 0;
+      padding: 22px 18px 30px; box-shadow: 0 -6px 20px rgba(0,0,0,0.12);
+    }
+    .sheet-title { text-align: center; font-size: 20px; color: var(--text-main); margin-bottom: 6px; }
+    .sheet-sub { text-align: center; font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
+    .acct-opt {
+      display: flex; align-items: center; gap: 12px; padding: 11px 14px; margin-bottom: 10px;
+      border-radius: 18px; background: var(--ivory); box-shadow: var(--shadow-sm); cursor: pointer; border: none; width: 100%;
+    }
+    .acct-opt.current { box-shadow: var(--shadow-in); }
+    .acct-opt .ao-name { font-family: 'Caveat', cursive; font-size: 18px; color: var(--text-main); }
+    .acct-opt .ao-code { font-family: 'Caveat', cursive; font-size: 12px; color: var(--text-muted); }
+
+    .empty-state { text-align: center; color: var(--text-light); font-size: 17px; padding: 50px 30px; line-height: 1.5; }
+    .toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: var(--accent-deep); color: #fff; padding: 10px 20px; border-radius: 18px;
+      font-family: 'Caveat', cursive; font-size: 16px; z-index: 400; opacity: 0;
+      transition: opacity .25s; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 0.96; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="top-bar">
+    <button class="me-chip" onclick="openAcctSheet()">
+      <span class="avatar" id="me-avatar"></span>
+      <span>
+        <span class="me-name" id="me-name"></span><br>
+        <span class="me-code" id="me-code"></span>
+      </span>
+    </button>
+    <button class="icon-btn" onclick="switchTab('notif')">
+      🔔<span class="badge" id="notif-badge" style="display:none;">0</span>
+    </button>
+  </div>
+
+  <!-- ===== HOME TAB ===== -->
+  <div id="tab-home">
+    <div id="main-view">
+      <div class="app-header">
+        <h1>whatieattoday</h1><br>
+        <p>오늘의 식사는 어떠셨나요?</p>
+      </div>
+      <div class="week-nav">
+        <button class="nav-btn" onclick="changeWeek(-1)">&#8249;</button>
+        <span class="week-label" id="week-label"></span>
+        <button class="nav-btn" onclick="changeWeek(1)">&#8250;</button>
+      </div>
+      <div class="days-grid" id="days-grid"></div>
+      <div class="magazine-section">
+        <div class="magazine-banner" onclick="openMagazine()">
+          <div class="magazine-icon">🍴</div>
+          <div class="magazine-info">
+            <h3>Seasonal Food Guide</h3>
+            <p>지금 꼭 먹어야 할 제철 음식 이야기</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FEED TAB ===== -->
+  <div id="tab-feed" style="display:none; padding-top: 8px;">
+    <div class="app-header" style="padding:8px 0 14px;">
+      <h1 style="font-size:26px;">친구들의 식탁</h1><br>
+      <p>오늘 친구들은 뭘 먹었을까요?</p>
+    </div>
+    <div id="feed-list"></div>
+  </div>
+
+  <!-- ===== FRIENDS TAB ===== -->
+  <div id="tab-friends" style="display:none; padding-top: 8px;">
+    <div class="app-header" style="padding:8px 0 12px;">
+      <h1 style="font-size:26px;">친구</h1><br>
+      <p id="my-code-hint"></p>
+    </div>
+    <div class="friends-search-row">
+      <input type="text" id="friend-search" placeholder="닉네임 또는 코드로 검색 (예: GRP-MINA)" />
+      <button class="small-btn" onclick="searchFriend()">검색</button>
+    </div>
+    <div id="search-result"></div>
+    <div id="requests-block"></div>
+    <div class="list-section-label">내 친구</div>
+    <div id="friends-list"></div>
+  </div>
+
+  <!-- ===== NOTIF TAB ===== -->
+  <div id="tab-notif" style="display:none; padding-top: 8px;">
+    <div class="app-header" style="padding:8px 0 14px;">
+      <h1 style="font-size:26px;">알림</h1>
+    </div>
+    <div id="notif-list"></div>
+  </div>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <div class="bottom-nav">
+    <button class="tab-btn active" id="nav-home" onclick="switchTab('home')"><span class="tab-ico">📖</span>다이어리</button>
+    <button class="tab-btn" id="nav-feed" onclick="switchTab('feed')"><span class="tab-ico">🍽️</span>피드</button>
+    <button class="tab-btn" id="nav-friends" onclick="switchTab('friends')"><span class="tab-ico">👥</span>친구<span class="badge" id="friends-badge" style="display:none;">0</span></button>
+    <button class="tab-btn" id="nav-notif" onclick="switchTab('notif')"><span class="tab-ico">🔔</span>알림<span class="badge" id="notif-tab-badge" style="display:none;">0</span></button>
+  </div>
+
+  <!-- ===== DETAIL VIEW (edit my meal) ===== -->
+  <div class="full-view" id="detail-view">
+    <div class="full-header">
+      <button class="back-btn" onclick="closeDetail()">&#8592;</button>
+      <div>
+        <div class="full-title" id="detail-title"></div>
+        <div class="full-subtitle" id="detail-subtitle"></div>
+      </div>
+    </div>
+    <div class="photo-upload-area" id="photo-area" onclick="triggerPhoto()">
+      <div class="photo-placeholder" id="photo-placeholder">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#a89070" stroke-width="1.2" stroke-linecap="round">
+          <rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+        </svg>
+        <p>사진을 탭해서 추가하기</p>
+      </div>
+      <img id="detail-photo" style="display:none;" alt="meal photo" />
+      <button class="photo-overlay-btn" id="photo-overlay-btn" style="display:none;" onclick="triggerPhoto(); event.stopPropagation();">+</button>
+    </div>
+    <input type="file" id="photo-input" accept="image/*" onchange="handlePhoto(event)" />
+    <div class="menu-input-wrap">
+      <div class="section-label">오늘 뭐 먹었어요?</div>
+      <div class="menu-row"><input type="text" id="menu-input" placeholder="예: 된장찌개, 삼겹살, 파스타..." /></div>
+    </div>
+    <div class="memo-section">
+      <div class="section-label">한 줄 일기</div>
+      <textarea class="memo-box" id="memo-box" placeholder="맛은 어땠나요?"></textarea>
+    </div>
+    <div class="tags-section">
+      <div class="section-label">기분 태그</div>
+      <div class="tag-chips" id="tag-chips">
+        <button class="tag-chip" onclick="toggleTag(this)">맛있었어</button>
+        <button class="tag-chip" onclick="toggleTag(this)">건강했어</button>
+        <button class="tag-chip" onclick="toggleTag(this)">과식했어</button>
+        <button class="tag-chip" onclick="toggleTag(this)">아쉬웠어</button>
+        <button class="tag-chip" onclick="toggleTag(this)">특별했어</button>
+        <button class="tag-chip" onclick="toggleTag(this)">간단했어</button>
+      </div>
+    </div>
+    <div class="vis-section">
+      <div class="section-label">공개 범위</div>
+      <div class="vis-row" id="vis-row">
+        <button class="vis-opt" data-vis="public" onclick="selectVis(this)">🌏 전체공개</button>
+        <button class="vis-opt" data-vis="friends" onclick="selectVis(this)">👥 친구공개</button>
+        <button class="vis-opt" data-vis="private" onclick="selectVis(this)">🔒 나만보기</button>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveEntry()">저 장 하 기</button>
+  </div>
+
+  <!-- ===== GUESTBOOK VIEW (exchange diary on a meal) ===== -->
+  <div class="full-view" id="guest-view">
+    <div class="full-header">
+      <button class="back-btn" onclick="closeGuest()">&#8592;</button>
+      <div>
+        <div class="full-title" id="guest-title"></div>
+        <div class="full-subtitle" id="guest-subtitle"></div>
+      </div>
+    </div>
+
+    <div class="meal-preview-card">
+      <div class="meal-preview-thumb" id="guest-thumb"></div>
+      <div class="meal-preview-info">
+        <div class="pv-menu" id="guest-menu"></div>
+        <div class="pv-memo" id="guest-memo"></div>
+        <div class="pv-tags" id="guest-tags"></div>
+      </div>
+    </div>
+
+    <div class="notes-wrap">
+      <div class="section-label" id="notes-count-label">교환일기</div>
+      <div id="notes-list"></div>
+    </div>
+
+    <div class="composer" id="composer">
+      <div class="section-label">✏️ 손그림 + 한마디 남기기</div>
+      <div class="draw-tools">
+        <button class="color-dot active" style="background:#5a4e3c;" data-color="#5a4e3c" onclick="pickColor(this)"></button>
+        <button class="color-dot" style="background:#c4756a;" data-color="#c4756a" onclick="pickColor(this)"></button>
+        <button class="color-dot" style="background:#7a9b76;" data-color="#7a9b76" onclick="pickColor(this)"></button>
+        <button class="color-dot" style="background:#d4a574;" data-color="#d4a574" onclick="pickColor(this)"></button>
+        <button class="color-dot" style="background:#6f8bab;" data-color="#6f8bab" onclick="pickColor(this)"></button>
+        <button class="tool-btn" id="pen-btn" onclick="setTool('pen')">✏️ 펜</button>
+        <button class="tool-btn" id="eraser-btn" onclick="setTool('eraser')">지우개</button>
+        <button class="tool-btn" onclick="clearCanvas()">↺ 전체</button>
+      </div>
+      <canvas id="note-canvas"></canvas>
+      <textarea class="note-text-input" id="note-text" placeholder="친구 식탁에 한마디 남겨보세요"></textarea>
+      <button class="leave-btn" onclick="leaveNote()">💌 남기기</button>
+    </div>
+  </div>
+
+  <!-- ===== MAGAZINE MODAL ===== -->
+  <div id="magazine-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeMagazine()">×</button>
+      <h2 style="text-align:center; margin-bottom:30px; font-size:28px;">Weekly Pick</h2>
+      <div class="mag-item"><span class="mag-tag">봄의 전령사</span><h4>🦀 달큰한 꽃게</h4><p>봄 꽃게는 알이 꽉 차고 살이 가장 달콤할 때예요. 탕으로 끓여도 좋지만, 찜으로 본연의 단맛을 느껴보는 건 어떨까요?</p></div>
+      <div class="mag-item"><span class="mag-tag">단짠의 정석</span><h4>🍅 대저 짭짤이 토마토</h4><p>부산 대저동에서만 나는 이 보물 같은 토마토는 짧은 봄에만 만날 수 있어요. 짭짤하면서도 강렬한 단맛이 매력적이죠.</p></div>
+      <div class="mag-item"><span class="mag-tag">요즘 유행</span><h4>🧈 고소한 버터떡</h4><p>겉은 바삭, 속은 쫀득! 가래떡을 버터에 구워 꿀이나 설탕을 곁들여보세요. 요즘 가장 핫한 홈메이드 간식이랍니다.</p></div>
+    </div>
+  </div>
+
+  <!-- ===== ACCOUNT SWITCHER ===== -->
+  <div id="acct-sheet" onclick="if(event.target===this)closeAcctSheet()">
+    <div class="sheet-panel">
+      <div class="sheet-title">계정 전환 (데모)</div>
+      <div class="sheet-sub">여러 사용자를 오가며 소셜 기능을 체험해보세요</div>
+      <div id="acct-opts"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* =========================================================
+   whatieattoday — social edition
+   - multi-user simulation (account switch)
+   - friend system: search / request / accept / reject
+   - exchange-diary guestbook: canvas drawing + text on friends' meals
+   - visibility filtering (public / friends / private)
+   - feed + notifications
+   In-memory store (resets on reload), seeded with demo data.
+   ========================================================= */
+
+const DAYS = ['일','월','화','수','목','금','토'];
+const MEALS = ['아침','점심','저녁'];
+const AVATAR_COLORS = { me:'#a89070', mina:'#c4756a', jun:'#7a9b76', soa:'#6f8bab' };
+
+/* ---------- date helpers ---------- */
+function fmt(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function dayOffsetKey(offset){ const d=new Date(); d.setDate(d.getDate()+offset); return fmt(d); }
+function isToday(d){ return fmt(d)===fmt(new Date()); }
+
+/* ---------- USERS ---------- */
+const users = {
+  me:   { id:'me',   name:'채민',   code:'GRP-CHAE', avatarText:'채' },
+  mina: { id:'mina', name:'미나',   code:'GRP-MINA', avatarText:'미' },
+  jun:  { id:'jun',  name:'준호',   code:'GRP-JUN',  avatarText:'준' },
+  soa:  { id:'soa',  name:'소아',   code:'GRP-SOA',  avatarText:'소' },
+};
+let currentUser = 'me';
+
+/* ---------- FRIEND GRAPH ---------- (symmetric on accept) */
+const friendships = {           // userId -> Set of friend ids
+  me:   new Set(['mina','jun']),
+  mina: new Set(['me','jun','soa']),
+  jun:  new Set(['me','mina']),
+  soa:  new Set(['mina']),
+};
+/* pending requests: { from, to } */
+let friendRequests = [
+  { from:'soa', to:'me' },      // soa already wants to be channel's friend (demo)
+];
+
+/* ---------- DIARIES ---------- diary[userId][dateKey-meal] = entry */
+const diaries = { me:{}, mina:{}, jun:{}, soa:{} };
+
+/* entry shape: { menu, memo, tags:[], photo, visibility, notes:[ {by, byName, text, draw(dataURL), ts} ] } */
+function blankEntry(){ return { menu:'', memo:'', tags:[], photo:null, visibility:'friends', notes:[] }; }
+
+/* ---------- SEED DEMO DATA ---------- */
+function seed(){
+  // channel(me)'s own records
+  diaries.me[`${dayOffsetKey(0)}-아침`] = { menu:'아보카도 토스트', memo:'간단하게 시작한 하루', tags:['건강했어','간단했어'], photo:null, visibility:'friends', notes:[] };
+  diaries.me[`${dayOffsetKey(-1)}-저녁`] = { menu:'마라탕', memo:'시험기간 스트레스엔 역시 마라탕 🌶️', tags:['맛있었어','과식했어'], photo:null, visibility:'public',
+    notes:[ { by:'mina', byName:'미나', text:'헐 나도 어제 마라탕 먹음 ㅋㅋㅋ 통했다', draw:null, ts:Date.now()-3600e3 } ] };
+
+  // mina's records
+  diaries.mina[`${dayOffsetKey(0)}-점심`] = { menu:'연어 포케', memo:'학식 질려서 포케집 감', tags:['건강했어','특별했어'], photo:null, visibility:'friends', notes:[] };
+  diaries.mina[`${dayOffsetKey(0)}-아침`] = { menu:'그릭요거트', memo:'다이어트 3일차...', tags:['건강했어'], photo:null, visibility:'public', notes:[] };
+  diaries.mina[`${dayOffsetKey(-1)}-저녁`] = { menu:'엽기떡볶이', memo:'오늘은 치팅데이!', tags:['맛있었어','특별했어'], photo:null, visibility:'friends',
+    notes:[ { by:'jun', byName:'준호', text:'나도 끼워줘ㅠ', draw:null, ts:Date.now()-7200e3 } ] };
+
+  // jun's records
+  diaries.jun[`${dayOffsetKey(0)}-점심`] = { menu:'김치찌개 백반', memo:'역시 한식이 최고', tags:['맛있었어'], photo:null, visibility:'friends', notes:[] };
+  diaries.jun[`${dayOffsetKey(-2)}-저녁`] = { menu:'수제버거', memo:'홍대 신상 버거집 발견', tags:['맛있었어','특별했어'], photo:null, visibility:'public', notes:[] };
+
+  // soa's records (soa is NOT yet channel's friend → should be filtered out of feed)
+  diaries.soa[`${dayOffsetKey(0)}-점심`] = { menu:'파스타', memo:'친구공개라 채민이는 못 봄', tags:['맛있었어'], photo:null, visibility:'friends', notes:[] };
+}
+seed();
+
+/* ---------- NOTIFICATIONS ---------- notif[userId] = [ {id,text,ts,read} ] */
+const notifs = { me:[], mina:[], jun:[], soa:[] };
+function pushNotif(userId, text){
+  notifs[userId].unshift({ id:Date.now()+Math.random(), text, ts:Date.now(), read:false });
+}
+pushNotif('me','<b>미나</b>님이 회원님의 <b>마라탕</b> 식탁에 한마디를 남겼어요 💌');
+pushNotif('me','<b>소아</b>님이 친구 요청을 보냈어요 👋');
+
+/* ===========================================================
+   NAVIGATION
+   =========================================================== */
+let weekOffset = 0;
+let activeTab = 'home';
+
+function switchTab(tab){
+  activeTab = tab;
+  ['home','feed','friends','notif'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = (t===tab)?'block':'none';
+    document.getElementById('nav-'+t).classList.toggle('active', t===tab);
+  });
+  if(tab==='feed') renderFeed();
+  if(tab==='friends') renderFriends();
+  if(tab==='notif'){ renderNotifs(); markAllNotifsRead(); }
+  window.scrollTo(0,0);
+}
+
+/* ===========================================================
+   ACCOUNT SWITCHER (multi-user simulation)
+   =========================================================== */
+function openAcctSheet(){
+  const box = document.getElementById('acct-opts');
+  box.innerHTML='';
+  Object.values(users).forEach(u=>{
+    const b=document.createElement('button');
+    b.className='acct-opt'+(u.id===currentUser?' current':'');
+    b.onclick=()=>switchAccount(u.id);
+    b.innerHTML=`<span class="avatar" style="background:${AVATAR_COLORS[u.id]}">${u.avatarText}</span>
+      <span style="text-align:left;"><span class="ao-name">${u.name}</span><br><span class="ao-code">${u.code}</span></span>`;
+    box.appendChild(b);
+  });
+  document.getElementById('acct-sheet').style.display='block';
+}
+function closeAcctSheet(){ document.getElementById('acct-sheet').style.display='none'; }
+function switchAccount(id){
+  currentUser=id; closeAcctSheet();
+  weekOffset=0; switchTab('home'); refreshAll();
+  toast(`${users[id].name}님으로 전환했어요`);
+}
+
+/* ===========================================================
+   HEADER / BADGES
+   =========================================================== */
+function refreshAll(){
+  const u=users[currentUser];
+  document.getElementById('me-name').textContent=u.name;
+  document.getElementById('me-code').textContent=u.code;
+  const av=document.getElementById('me-avatar');
+  av.textContent=u.avatarText; av.style.background=AVATAR_COLORS[currentUser];
+  document.getElementById('my-code-hint').textContent=`내 코드: ${u.code} · 친구에게 공유해보세요`;
+  renderGrid();
+  updateBadges();
+}
+function updateBadges(){
+  const unread = notifs[currentUser].filter(n=>!n.read).length;
+  ['notif-badge','notif-tab-badge'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.display = unread>0?'flex':'none'; el.textContent=unread;
+  });
+  const reqCount = friendRequests.filter(r=>r.to===currentUser).length;
+  const fb=document.getElementById('friends-badge');
+  fb.style.display = reqCount>0?'flex':'none'; fb.textContent=reqCount;
+}
+
+/* ===========================================================
+   HOME GRID (own diary)
+   =========================================================== */
+function getWeekDates(offset){
+  const today=new Date(); const day=today.getDay();
+  const monday=new Date(today);
+  monday.setDate(today.getDate()-(day===0?6:day-1)+offset*7);
+  return Array.from({length:7},(_,i)=>{ const d=new Date(monday); d.setDate(monday.getDate()+i); return d; });
+}
+function changeWeek(dir){ weekOffset+=dir; renderGrid(); }
+
+function renderGrid(){
+  const dates=getWeekDates(weekOffset);
+  document.getElementById('week-label').textContent=
+    `${dates[0].getMonth()+1}/${dates[0].getDate()} — ${dates[6].getMonth()+1}/${dates[6].getDate()}`;
+  const grid=document.getElementById('days-grid'); grid.innerHTML='';
+  const dayOrder=[1,2,3,4,5,6,0]; const dayLabels=['월','화','수','목','금','토','일'];
+  const diary=diaries[currentUser];
+
+  dayOrder.forEach((di,idx)=>{
+    const date=dates[di];
+    const col=document.createElement('div'); col.className='day-col';
+    const lbl=document.createElement('div');
+    lbl.className='day-label'+(isToday(date)?' today':'');
+    lbl.textContent=dayLabels[idx]; col.appendChild(lbl);
+
+    MEALS.forEach(meal=>{
+      const key=`${fmt(date)}-${meal}`;
+      const entry=diary[key];
+      const btn=document.createElement('button');
+      btn.className='meal-thumb'+(entry&&entry.photo?' has-photo':(entry&&entry.draw?' has-draw':''));
+      btn.onclick=()=>openDetail(date,meal,key);
+
+      if(entry&&entry.photo){
+        const img=document.createElement('img'); img.src=entry.photo; btn.appendChild(img);
+      } else if(entry&&entry.menu){
+        const wrap=document.createElement('div');
+        wrap.style.cssText='width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fdf6e8,#f5edd8);border-radius:14px;font-size:13px;color:#8b6f4e;text-align:center;padding:2px;line-height:1.1;';
+        wrap.textContent=entry.menu.length>6?entry.menu.slice(0,6):entry.menu;
+        btn.appendChild(wrap);
+      } else {
+        const def=document.createElement('div'); def.className='default-icon';
+        def.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a89070" stroke-width="1.3" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>`;
+        btn.appendChild(def);
+      }
+      // friend-note marker
+      if(entry&&entry.notes&&entry.notes.length){
+        const dot=document.createElement('span'); dot.className='friend-dot'; btn.appendChild(dot);
+      }
+      const tl=document.createElement('span'); tl.className='meal-time-label'; tl.textContent=meal;
+      btn.appendChild(tl); col.appendChild(btn);
+    });
+    grid.appendChild(col);
+  });
+}
+
+/* ===========================================================
+   DETAIL (edit my own meal)
+   =========================================================== */
+let currentKey=null, currentVis='friends';
+
+function openDetail(date,meal,key){
+  currentKey=key;
+  const entry=diaries[currentUser][key]||blankEntry();
+  document.getElementById('detail-title').textContent=`${date.getMonth()+1}월 ${date.getDate()}일 ${DAYS[date.getDay()]}요일`;
+  document.getElementById('detail-subtitle').textContent=meal+ (entry.notes&&entry.notes.length?` · 친구 한마디 ${entry.notes.length}개 💌`:'');
+
+  const ph=document.getElementById('detail-photo');
+  const placeholder=document.getElementById('photo-placeholder');
+  const overlayBtn=document.getElementById('photo-overlay-btn');
+  if(entry.photo){
+    ph.src=entry.photo; ph.style.display='block'; placeholder.style.display='none'; overlayBtn.style.display='flex';
+  } else {
+    ph.style.display='none'; ph.src=''; placeholder.style.display='flex'; overlayBtn.style.display='none';
+  }
+  document.getElementById('menu-input').value=entry.menu||'';
+  document.getElementById('memo-box').value=entry.memo||'';
+  document.querySelectorAll('#tag-chips .tag-chip').forEach(c=>
+    c.classList.toggle('selected',(entry.tags||[]).includes(c.textContent)));
+  currentVis=entry.visibility||'friends';
+  document.querySelectorAll('#vis-row .vis-opt').forEach(o=>o.classList.toggle('selected',o.dataset.vis===currentVis));
+
+  document.getElementById('detail-view').style.display='block';
+  document.getElementById('detail-view').scrollTop=0;
+}
+function closeDetail(){ document.getElementById('detail-view').style.display='none'; renderGrid(); }
+function triggerPhoto(){ document.getElementById('photo-input').click(); }
+function handlePhoto(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const src=ev.target.result;
+    document.getElementById('detail-photo').src=src;
+    document.getElementById('detail-photo').style.display='block';
+    document.getElementById('photo-placeholder').style.display='none';
+    document.getElementById('photo-overlay-btn').style.display='flex';
+    if(!diaries[currentUser][currentKey]) diaries[currentUser][currentKey]=blankEntry();
+    diaries[currentUser][currentKey].photo=src;
+  };
+  reader.readAsDataURL(file); e.target.value='';
+}
+function toggleTag(el){ el.classList.toggle('selected'); }
+function selectVis(el){
+  currentVis=el.dataset.vis;
+  document.querySelectorAll('#vis-row .vis-opt').forEach(o=>o.classList.toggle('selected',o===el));
+}
+function saveEntry(){
+  if(!diaries[currentUser][currentKey]) diaries[currentUser][currentKey]=blankEntry();
+  const e=diaries[currentUser][currentKey];
+  e.menu=document.getElementById('menu-input').value;
+  e.memo=document.getElementById('memo-box').value;
+  e.tags=[...document.querySelectorAll('#tag-chips .tag-chip.selected')].map(c=>c.textContent);
+  e.visibility=currentVis;
+  closeDetail(); toast('저장했어요 ✨');
+}
+
+/* ===========================================================
+   FEED (friends' visible meals)
+   =========================================================== */
+function visibleToMe(ownerId, entry){
+  if(ownerId===currentUser) return true;
+  if(entry.visibility==='private') return false;
+  if(entry.visibility==='public') return true;
+  // friends-only
+  return friendships[currentUser] && friendships[currentUser].has(ownerId);
+}
+
+function collectFeed(){
+  const items=[];
+  Object.keys(diaries).forEach(ownerId=>{
+    if(ownerId===currentUser) return;
+    Object.keys(diaries[ownerId]).forEach(key=>{
+      const entry=diaries[ownerId][key];
+      if(!entry.menu) return;
+      if(!visibleToMe(ownerId,entry)) return;
+      const m=key.match(/^(\d{4}-\d{2}-\d{2})-(.+)$/);
+      items.push({ ownerId, key, dateStr:m[1], meal:m[2], entry });
+    });
+  });
+  items.sort((a,b)=> b.dateStr.localeCompare(a.dateStr));
+  return items;
+}
+
+function renderFeed(){
+  const wrap=document.getElementById('feed-list'); wrap.innerHTML='';
+  const items=collectFeed();
+  if(!items.length){
+    wrap.innerHTML='<div class="empty-state">아직 친구들의 식단이 없어요.<br>친구를 추가하면 여기에 나타나요 🍽️</div>'; return;
+  }
+  items.forEach(it=>{
+    const u=users[it.ownerId];
+    const card=document.createElement('div'); card.className='feed-card';
+    card.onclick=()=>openGuest(it.ownerId,it.key);
+    const tagsHtml=(it.entry.tags||[]).map(t=>`<span class="pv-tag">${t}</span>`).join(' ');
+    const thumbInner = it.entry.photo
+      ? `<img src="${it.entry.photo}">`
+      : `<span style="font-size:30px;">${mealEmoji(it.entry.menu)}</span>`;
+    const md=it.dateStr.slice(5).replace('-','/');
+    card.innerHTML=`
+      <div class="feed-head">
+        <span class="avatar" style="background:${AVATAR_COLORS[it.ownerId]}">${u.avatarText}</span>
+        <span><span class="fh-name">${u.name}</span><br><span class="fh-meta">${md} · ${it.meal} · ${visLabel(it.entry.visibility)}</span></span>
+      </div>
+      <div class="feed-body">
+        <div class="feed-thumb">${thumbInner}</div>
+        <div class="feed-info"><div class="fi-menu">${it.entry.menu}</div><div class="fi-memo">${it.entry.memo||''}</div>
+          <div class="pv-tags" style="margin-top:6px;">${tagsHtml}</div></div>
+      </div>
+      <div class="feed-foot">
+        <span class="ff-item">💌 한마디 ${it.entry.notes.length}</span>
+        <span class="ff-item" style="color:var(--accent);">✏️ 교환일기 남기기 →</span>
+      </div>`;
+    wrap.appendChild(card);
+  });
+}
+function mealEmoji(menu){
+  const map=[['면|국수|파스타|라면','🍜'],['밥|백반|덮밥','🍚'],['버거','🍔'],['포케|샐러드|요거트','🥗'],['떡볶이','🌶️'],['토스트|빵','🍞']];
+  for(const [k,e] of map){ if(new RegExp(k).test(menu)) return e; } return '🍽️';
+}
+function visLabel(v){ return v==='public'?'전체공개':v==='friends'?'친구공개':'나만보기'; }
+
+/* ===========================================================
+   GUESTBOOK (exchange diary): view + leave note w/ drawing
+   =========================================================== */
+let guestOwner=null, guestKey=null;
+
+function openGuest(ownerId,key){
+  guestOwner=ownerId; guestKey=key;
+  const entry=diaries[ownerId][key];
+  const u=users[ownerId];
+  const m=key.match(/^(\d{4}-\d{2}-\d{2})-(.+)$/);
+  document.getElementById('guest-title').textContent=`${u.name}님의 식탁`;
+  document.getElementById('guest-subtitle').textContent=`${m[1].slice(5).replace('-','/')} · ${m[2]}`;
+
+  const thumb=document.getElementById('guest-thumb');
+  thumb.innerHTML = entry.photo?`<img src="${entry.photo}">`:`<span style="font-size:32px;">${mealEmoji(entry.menu)}</span>`;
+  document.getElementById('guest-menu').textContent=entry.menu;
+  document.getElementById('guest-memo').textContent=entry.memo||'';
+  document.getElementById('guest-tags').innerHTML=(entry.tags||[]).map(t=>`<span class="pv-tag">${t}</span>`).join(' ');
+
+  renderNotes(entry);
+
+  // composer only if not my own meal
+  document.getElementById('composer').style.display = (ownerId===currentUser)?'none':'block';
+  if(ownerId!==currentUser) setTimeout(initCanvas,50);
+
+  document.getElementById('guest-view').style.display='block';
+  document.getElementById('guest-view').scrollTop=0;
+}
+function closeGuest(){
+  document.getElementById('guest-view').style.display='none';
+  if(activeTab==='feed') renderFeed(); else renderGrid();
+}
+function renderNotes(entry){
+  const list=document.getElementById('notes-list');
+  document.getElementById('notes-count-label').textContent=`교환일기 (${entry.notes.length})`;
+  if(!entry.notes.length){ list.innerHTML='<div class="notes-empty">아직 남겨진 한마디가 없어요. 첫 손그림을 남겨보세요 ✏️</div>'; return; }
+  list.innerHTML='';
+  entry.notes.slice().reverse().forEach(n=>{
+    const item=document.createElement('div'); item.className='note-item';
+    const drawHtml=n.draw?`<img class="note-draw" src="${n.draw}" style="width:100%;max-width:240px;">`:'';
+    item.innerHTML=`
+      <span class="avatar" style="background:${AVATAR_COLORS[n.by]||'#a89070'}">${(users[n.by]&&users[n.by].avatarText)||'?'}</span>
+      <div class="note-body">
+        <div class="note-head"><span class="nh-name">${n.byName}</span><span class="nh-time">${timeAgo(n.ts)}</span></div>
+        ${n.text?`<div class="note-text">${escapeHtml(n.text)}</div>`:''}
+        ${drawHtml}
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+/* ---------- CANVAS DRAWING ---------- */
+let ctx=null, drawing=false, penColor='#5a4e3c', tool='pen', hasDrawn=false, lastX=0, lastY=0;
+function initCanvas(){
+  const canvas=document.getElementById('note-canvas');
+  const rect=canvas.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=rect.width*dpr; canvas.height=rect.height*dpr;
+  ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.fillStyle='#fffdf6'; ctx.fillRect(0,0,rect.width,rect.height);
+  hasDrawn=false; tool='pen'; penColor='#5a4e3c';
+  document.querySelectorAll('.color-dot').forEach((d,i)=>d.classList.toggle('active',i===0));
+  setTool('pen');
+
+  const pos=e=>{
+    const r=canvas.getBoundingClientRect();
+    const t=e.touches?e.touches[0]:e;
+    return { x:t.clientX-r.left, y:t.clientY-r.top };
+  };
+  const start=e=>{ e.preventDefault(); drawing=true; const p=pos(e); lastX=p.x; lastY=p.y; };
+  const move=e=>{
+    if(!drawing) return; e.preventDefault();
+    const p=pos(e);
+    ctx.strokeStyle = tool==='eraser'?'#fffdf6':penColor;
+    ctx.lineWidth = tool==='eraser'?18:3;
+    ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y); ctx.stroke();
+    lastX=p.x; lastY=p.y; hasDrawn=true;
+  };
+  const end=()=>{ drawing=false; };
+  canvas.onmousedown=start; canvas.onmousemove=move; window.onmouseup=end;
+  canvas.ontouchstart=start; canvas.ontouchmove=move; canvas.ontouchend=end;
+}
+function pickColor(el){
+  penColor=el.dataset.color; tool='pen';
+  document.querySelectorAll('.color-dot').forEach(d=>d.classList.toggle('active',d===el));
+  setTool('pen');
+}
+function setTool(t){
+  tool=t;
+  document.getElementById('pen-btn').classList.toggle('active',t==='pen');
+  document.getElementById('eraser-btn').classList.toggle('active',t==='eraser');
+}
+function clearCanvas(){
+  if(!ctx) return;
+  const canvas=document.getElementById('note-canvas');
+  const rect=canvas.getBoundingClientRect();
+  ctx.fillStyle='#fffdf6'; ctx.fillRect(0,0,rect.width,rect.height); hasDrawn=false;
+}
+function leaveNote(){
+  const text=document.getElementById('note-text').value.trim();
+  if(!text && !hasDrawn){ toast('손그림이나 한마디를 남겨주세요'); return; }
+  const entry=diaries[guestOwner][guestKey];
+  const draw = hasDrawn?document.getElementById('note-canvas').toDataURL('image/png'):null;
+  entry.notes.push({ by:currentUser, byName:users[currentUser].name, text, draw, ts:Date.now() });
+  // notify the owner
+  pushNotif(guestOwner, `<b>${users[currentUser].name}</b>님이 회원님의 <b>${entry.menu}</b> 식탁에 한마디를 남겼어요 💌`);
+  document.getElementById('note-text').value=''; clearCanvas();
+  renderNotes(entry);
+  toast('교환일기를 남겼어요 💌'); updateBadges();
+}
+
+/* ===========================================================
+   FRIENDS
+   =========================================================== */
+function renderFriends(){
+  document.getElementById('search-result').innerHTML='';
+  document.getElementById('friend-search').value='';
+  // incoming requests
+  const reqBlock=document.getElementById('requests-block');
+  const incoming=friendRequests.filter(r=>r.to===currentUser);
+  if(incoming.length){
+    let html='<div class="list-section-label">받은 친구 요청</div>';
+    incoming.forEach(r=>{
+      const u=users[r.from];
+      html+=`<div class="person-row">
+        <span class="avatar" style="background:${AVATAR_COLORS[r.from]}">${u.avatarText}</span>
+        <div class="pr-info"><div class="pr-name">${u.name}</div><div class="pr-code">${u.code}</div></div>
+        <div class="req-btns">
+          <button class="mini-btn" onclick="acceptReq('${r.from}')">수락</button>
+          <button class="mini-btn ghost" onclick="rejectReq('${r.from}')">거절</button>
+        </div></div>`;
+    });
+    reqBlock.innerHTML=html;
+  } else reqBlock.innerHTML='';
+
+  // friend list
+  const list=document.getElementById('friends-list'); list.innerHTML='';
+  const fset=friendships[currentUser];
+  if(!fset || !fset.size){ list.innerHTML='<div class="empty-state" style="padding:24px;">아직 친구가 없어요.<br>위에서 코드로 친구를 찾아보세요!</div>'; return; }
+  [...fset].forEach(fid=>{
+    const u=users[fid];
+    const row=document.createElement('div'); row.className='person-row';
+    row.innerHTML=`<span class="avatar" style="background:${AVATAR_COLORS[fid]}">${u.avatarText}</span>
+      <div class="pr-info"><div class="pr-name">${u.name}</div><div class="pr-code">${u.code}</div></div>
+      <button class="mini-btn" onclick="switchTab('feed')">식단 보기</button>`;
+    list.appendChild(row);
+  });
+}
+function searchFriend(){
+  const q=document.getElementById('friend-search').value.trim().toLowerCase();
+  const box=document.getElementById('search-result'); box.innerHTML='';
+  if(!q) return;
+  const found=Object.values(users).filter(u=>
+    u.id!==currentUser &&
+    (u.code.toLowerCase().includes(q)||u.name.toLowerCase().includes(q)));
+  if(!found.length){ box.innerHTML='<div class="empty-state" style="padding:20px;">검색 결과가 없어요 🔍</div>'; return; }
+  found.forEach(u=>{
+    const isFriend=friendships[currentUser].has(u.id);
+    const pendingOut=friendRequests.some(r=>r.from===currentUser&&r.to===u.id);
+    const pendingIn=friendRequests.some(r=>r.from===u.id&&r.to===currentUser);
+    let btn;
+    if(isFriend) btn=`<button class="mini-btn pending">친구✓</button>`;
+    else if(pendingOut) btn=`<button class="mini-btn pending">요청됨</button>`;
+    else if(pendingIn) btn=`<button class="mini-btn" onclick="acceptReq('${u.id}')">수락하기</button>`;
+    else btn=`<button class="mini-btn" onclick="sendReq('${u.id}')">+ 친구 요청</button>`;
+    const row=document.createElement('div'); row.className='person-row';
+    row.innerHTML=`<span class="avatar" style="background:${AVATAR_COLORS[u.id]}">${u.avatarText}</span>
+      <div class="pr-info"><div class="pr-name">${u.name}</div><div class="pr-code">${u.code}</div></div>${btn}`;
+    box.appendChild(row);
+  });
+}
+function sendReq(toId){
+  friendRequests.push({ from:currentUser, to:toId });
+  pushNotif(toId, `<b>${users[currentUser].name}</b>님이 친구 요청을 보냈어요 👋`);
+  toast(`${users[toId].name}님에게 요청을 보냈어요`);
+  searchFriend(); updateBadges();
+}
+function acceptReq(fromId){
+  friendRequests=friendRequests.filter(r=>!(r.from===fromId&&r.to===currentUser));
+  friendships[currentUser].add(fromId);
+  friendships[fromId].add(currentUser);
+  pushNotif(fromId, `<b>${users[currentUser].name}</b>님이 친구 요청을 수락했어요 🎉`);
+  toast(`${users[fromId].name}님과 친구가 되었어요 🎉`);
+  renderFriends(); updateBadges();
+}
+function rejectReq(fromId){
+  friendRequests=friendRequests.filter(r=>!(r.from===fromId&&r.to===currentUser));
+  renderFriends(); updateBadges();
+}
+
+/* ===========================================================
+   NOTIFICATIONS
+   =========================================================== */
+function renderNotifs(){
+  const list=document.getElementById('notif-list'); list.innerHTML='';
+  const arr=notifs[currentUser];
+  if(!arr.length){ list.innerHTML='<div class="empty-state">알림이 없어요 🔔</div>'; return; }
+  arr.forEach(n=>{
+    const item=document.createElement('div');
+    item.className='notif-item'+(n.read?'':' unread');
+    item.innerHTML=`${n.read?'':'<span class="notif-unread-dot"></span>'}
+      <div class="ni-text">${n.text}</div><div class="ni-time">${timeAgo(n.ts)}</div>`;
+    list.appendChild(item);
+  });
+}
+function markAllNotifsRead(){
+  setTimeout(()=>{ notifs[currentUser].forEach(n=>n.read=true); updateBadges(); }, 800);
+}
+
+/* ===========================================================
+   UTILITIES
+   =========================================================== */
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return '방금';
+  if(s<3600) return Math.floor(s/60)+'분 전';
+  if(s<86400) return Math.floor(s/3600)+'시간 전';
+  return Math.floor(s/86400)+'일 전';
+}
+function escapeHtml(str){ const d=document.createElement('div'); d.textContent=str; return d.innerHTML; }
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1800);
+}
+function openMagazine(){ document.getElementById('magazine-modal').style.display='block'; document.body.style.overflow='hidden'; }
+function closeMagazine(){ document.getElementById('magazine-modal').style.display='none'; document.body.style.overflow='auto'; }
+window.addEventListener('click', e=>{ if(e.target===document.getElementById('magazine-modal')) closeMagazine(); });
+
+/* ---------- INIT ---------- */
+refreshAll();
+</script>
+</body>
+</html>
